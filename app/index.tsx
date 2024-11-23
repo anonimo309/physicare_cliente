@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { loginCliente } from './services/clienteService'; // Importe a função de login
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa AsyncStorage
 
 export default function Index() {
   const [email, setEmail] = useState('');
@@ -11,10 +12,13 @@ export default function Index() {
   const handleLogin = async () => {
     try {
       const response = await loginCliente(email, senha);
-      // Armazenar o token no storage ou cookies
       console.log('Login bem-sucedido:', response);
+
+      // Armazenar o token no AsyncStorage
+      await AsyncStorage.setItem('token', response.token); // Supondo que a resposta contenha o campo "token"
+
       Alert.alert('Login bem-sucedido');
-      // Redirecionar para a próxima tela ou para a página inicial
+      router.push('/home'); // Navega para a página inicial após o login
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       Alert.alert('Erro', 'Credenciais inválidas');
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 40, // Space from the top
+    marginTop: 40, // Espaço do topo
   },
   container: {
     flex: 1,
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
   },
   registerButtonText: {
     fontSize: 16,
-    color: '#1E90FF', // Blue color for the text
-    textDecorationLine: 'underline', // Text underline effect
+    color: '#1E90FF', // Cor azul para o texto
+    textDecorationLine: 'underline', // Efeito de sublinhado no texto
   },
 });
