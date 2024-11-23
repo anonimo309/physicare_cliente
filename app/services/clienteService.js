@@ -15,7 +15,7 @@ export const registerCliente = async clienteData => {
 export const loginCliente = async (email, senha) => {
   try {
     const response = await api.post('/clientes/login', { email, senha });
-    return response.data; // Retorna o token JWT
+    return response.data;
   } catch (error) {
     console.error('Erro ao fazer login:', error);
     throw error.response ? error.response.data : error;
