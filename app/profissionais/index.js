@@ -16,11 +16,16 @@ import {
   listarSolicitacoesPorUsuario,
 } from "../services/solicitacaoService";
 
+import { getFichaByCliente } from "../services/fichaService";
+import Header from "../../components/Header";
+import { useRouter } from "expo-router";
+
 export default function ListaProfissionais() {
   const [profissionais, setProfissionais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usuarioId, setUsuarioId] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +40,6 @@ export default function ListaProfissionais() {
         // Busca profissionais e solicitações
         const profissionaisData = await listarProfissionais();
         const solicitacoes = await listarSolicitacoesPorUsuario(usuario, token);
-        console.log(solicitacoes);
 
         // Associa as solicitações aos profissionais
         const profissionaisComEstado = profissionaisData.map((profissional) => {
@@ -59,7 +63,6 @@ export default function ListaProfissionais() {
 
   const handleSolicitarApoio = async (profissionalId) => {
     try {
-      console.log("solicitando apoio a: ", profissionalId);
       await solicitarApoio(profissionalId);
       Alert.alert("Sucesso", "Solicitação enviada com sucesso.");
 
@@ -82,12 +85,24 @@ export default function ListaProfissionais() {
     );
   };
 
-  const handleVisualizarFicha = (profissional) => {
-    Alert.alert(
-      "Ficha de Exercícios",
-      `Visualizando ficha do profissional ${profissional.nome}.`
-    );
-    // Aqui você pode navegar para uma tela específica ou exibir mais detalhes.
+  const handleVisualizarFicha = async (profissional) => {
+    try {
+      const clienteId = await getUsuarioFromToken(); 
+      const fichas = await getFichaByCliente(clienteId);
+  
+      const ficha = fichas.find((f) => f.profissionalId._id === profissional._id);
+  
+      if (!ficha) {
+        Alert.alert("Erro", "Nenhuma ficha associada a este profissional.");
+        return;
+      }
+  
+      // Redireciona para a página de ficha com o ID encontrado
+      router.push(`/fichas/${ficha._id}`);
+    } catch (error) {
+      console.error("Erro ao visualizar ficha:", error);
+      Alert.alert("Erro", "Não foi possível carregar a ficha.");
+    }
   };
 
   if (loading) {
@@ -105,6 +120,7 @@ export default function ListaProfissionais() {
 
   return (
     <View style={styles.container}>
+      <Header />
       <Text style={styles.title}>Lista de Profissionais</Text>
       <FlatList
         data={profissionais}
@@ -155,14 +171,13 @@ export default function ListaProfissionais() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginVertical: 20,
     textAlign: "center",
+    color: "#333",
   },
   loadingContainer: {
     flex: 1,
@@ -177,43 +192,56 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+    marginHorizontal: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowRadius: 4,
+    elevation: 2,
+    width: '40%',
+    alignSelf: 'center'
   },
   name: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
+    color: "#1E88E5",
+    marginBottom: 5,
   },
   specialty: {
     fontSize: 14,
-    color: "#666",
-    marginTop: 5,
+    color: "#757575",
     marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 10,
   },
   apoioButton: {
     backgroundColor: "#6200ee",
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    flex: 1,
+    marginRight: 5,
   },
   contatoButton: {
     backgroundColor: "#03dac5",
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    flex: 1,
+    marginLeft: 5,
   },
   disabledButton: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#d1d1d1",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    flex: 1,
+    marginRight: 5,
   },
   buttonText: {
     color: "#fff",
@@ -224,7 +252,9 @@ const styles = StyleSheet.create({
   visualizarFichaButton: {
     backgroundColor: "#ff9800",
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    flex: 1,
+    marginRight: 5,
   },
 });
