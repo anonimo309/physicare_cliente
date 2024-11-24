@@ -13,7 +13,7 @@ export default function Header() {
       <TouchableOpacity onPress={() => router.push('/profissionais')}>
         <Text style={styles.link}>Profissionais</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/fichas')}>
+      <TouchableOpacity onPress={() => router.push('/minhas-fichas')}>
         <Text style={styles.link}>Minhas Fichas</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/conta')}>
